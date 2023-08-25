@@ -3,52 +3,49 @@ function createNavigationBar() {
 
     var parentNavDiv = document.createElement("div");
     parentNavDiv.setAttribute("class", "row");
-    parentNavDiv.style.height = "70px";
-    parentNavDiv.style.backgroundColor = "black";
+    parentNavDiv.setAttribute("style","position:fixed; top:0%; left:0%; min-height:75px; width:102%; background-color:#2a55e5; z-index:4;")
 
     var logoDiv = document.createElement("div");
-    logoDiv.setAttribute("class", "col-md-3");
+    logoDiv.setAttribute("class", "col-md-3 pl-5");
     logoDiv.style.height = 70;
     logoDiv.style.marginLeft = 20;
 
     var home = document.createElement("a");
-    home.setAttribute("href", "./index.html");
-    home.setAttribute("style", "text-decoration:none;")
+    home.setAttribute("href", "#");
+    home.setAttribute("style", "text-decoration:none;");
 
-    var logoText = document.createElement("h3");
-    logoText.innerHTML = "<span class='text-danger'>Do</span> <span class='text-white'>Shopping</span>";
+    home.addEventListener("click", function(){
+        mainDiv.innerHTML="";
+        createNavigationBar();
+        var data = localStorage.getItem("productList");
+            data = JSON.parse(data);
+        createMainPage(data);
+    });
+
+    var logoText = document.createElement("h2");
+    logoText.innerHTML = "<span id='do' >Shop</span> <span class='text-white'>Now</span>";
+
 
     var textLabel = document.createElement("label");
     textLabel.innerHTML = "By Sitting Anywhere";
-    textLabel.setAttribute("class", "text-white");
+    textLabel.setAttribute("style", "color:#C6EBBE; font-size:15px; font-weight:400; padding-left:1px;");
 
     home.appendChild(logoText)
     logoDiv.appendChild(home);
     logoDiv.appendChild(textLabel);
 
     var searchDiv = document.createElement("div");
-    searchDiv.setAttribute("class", "col-md-6 d-flex align-items-center");
+    searchDiv.setAttribute("class", "col-md-6 d-flex align-items-center ");
     searchDiv.setAttribute("style", "height:70px;");
 
     var searchBar = document.createElement("input");
-    searchBar.setAttribute("type", "search");
+    searchBar.setAttribute("type", "text");
     searchBar.setAttribute("class", "form-control");
     searchBar.setAttribute("placeholder", "Search Products");
-
-    // var cart = document.createElement("div");
-    // cart.setAttribute("class", "col-md-2 offset-1 d-flex align-items-center");
-
-    // //var ref = document.createElement("a");
-    // //ref.setAttribute("href", "./cart.html");
+    searchBar.setAttribute("id", "search");
+    searchBar.setAttribute("onKeyup", "searchProduct()");
 
 
-    // var cartIcon = document.createElement("i");
-    // cartIcon.setAttribute("class", "bx bx-cart-alt");
-    // cartIcon.setAttribute("style", "color: white ;font-size:35px; ");
-
-    // cart.appendChild(ref);
-
-    // ref.appendChild(cartIcon);
 
     searchDiv.appendChild(searchBar);
 
@@ -59,42 +56,39 @@ function createNavigationBar() {
     if (isLoggedIn()) {
         var viewCartLink = document.createElement("a");
         viewCartLink.setAttribute("href", "#");
-        viewCartLink.innerHTML = "View Cart";
-        viewCartLink.setAttribute("style", "color:white; text-decoration:none;")
+        viewCartLink.innerText = "View Cart";
+        viewCartLink.setAttribute("style", "color:white; text-decoration:none; font-size:20px;")
+
+        viewCartLink.addEventListener("click", function () {
+            displayCart();
+        });
 
         rightMenu.appendChild(viewCartLink);
 
         var signOutLink = document.createElement("a");
         signOutLink.setAttribute("href", "#");
-        signOutLink.innerHTML = "Sign Out";
-        signOutLink.setAttribute("style", "color:white; text-decoration:none;");
+        signOutLink.innerText = "Sign Out";
+        signOutLink.setAttribute("style", "color:white; text-decoration:none; font-size:20px;");
         rightMenu.appendChild(signOutLink);
 
         signOutLink.addEventListener("click", function () {
             sessionStorage.clear();
             window.location.reload();
         });
-    } else {
+    }
+    else {
         var signInLink = document.createElement("a");
         signInLink.setAttribute("href", "#");
-        signInLink.innerHTML = "Sign In";
-        signInLink.setAttribute("style", "color:white; text-decoration:none;");
-
-        rightMenu.appendChild(signInLink);
+        signInLink.innerText = "Sign In";
+        signInLink.setAttribute("style", "color:white; text-decoration:none; font-size:20px;");
 
         var signUpLink = document.createElement("a");
         signUpLink.setAttribute("href", "#");
-        signUpLink.innerHTML = "Sign Up";
-        signUpLink.setAttribute("style", "color:white; text-decoration:none");
+        signUpLink.innerText = "Sign Up";
+        signUpLink.setAttribute("style", "color:white; text-decoration:none; font-size:20px;");
 
         rightMenu.appendChild(signUpLink);
-
-        signInLink.addEventListener("click", function () {
-            var mainDiv = document.querySelector("#main");
-            mainDiv.innerHTML = "";
-            createNavigationBar();
-            createSignInPage(mainDiv);
-        });
+        rightMenu.appendChild(signInLink);
 
         signUpLink.addEventListener("click", function () {
             var mainDiv = document.querySelector("#main");
@@ -102,47 +96,228 @@ function createNavigationBar() {
             createNavigationBar();
             createSignUpPage(mainDiv);
         });
+
+        signInLink.addEventListener("click", function () {
+            var mainDiv = document.querySelector("#main");
+            mainDiv.innerHTML = "";
+            createNavigationBar();
+            createSignInPage(mainDiv);
+        });
     }
 
     parentNavDiv.appendChild(logoDiv);
     parentNavDiv.appendChild(searchDiv);
     parentNavDiv.appendChild(rightMenu);
-    // parentNavDiv.appendChild(cart);
     mainDiv.appendChild(parentNavDiv);
+}
+
+function searchProduct() {
+    var searchInput = document.querySelector("#search");
+    var keyword = searchInput.value;
+    var productList = localStorage.getItem("productList");
+    productList = JSON.parse(productList);
+
+    var searchResult = productList.filter((product) => product.title.toLowerCase().includes(keyword.toLowerCase()));
+
+    var mainDiv = document.querySelector("#main");
+    mainDiv.innerHTML = "";
+    createNavigationBar();
+    document.querySelector("#search").value = keyword;
+    document.querySelector("#search").focus();
+    createMainPage(searchResult);
+}
+
+function displayCart() {
+    var mainDiv = document.querySelector("#main");
+    mainDiv.innerHTML = "";
+    createNavigationBar();
+
+    var containerDiv = document.createElement("div");
+    containerDiv.setAttribute("class", "container mt-5");
+    containerDiv.setAttribute("style","margin-top:200px;")
+
+    var rowDiv = document.createElement("div");
+    rowDiv.setAttribute("class", "row");
+
+    var leftColDiv = document.createElement("div");
+    leftColDiv.setAttribute("class", "col-md-8 border");
+
+    var table = document.createElement("table");
+    table.setAttribute("class", "table");
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.innerText = "S.No";
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.innerText = "Title";
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.innerText = "Brand";
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.innerText = "Price";
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.innerText = "Qty";
+    tr.appendChild(td);
+    table.appendChild(tr);
+
+    var cartItemList = localStorage.getItem("cartItemList");
+    cartItemList = JSON.parse(cartItemList);
+
+    for (var index in cartItemList) {
+        var tr = document.createElement("tr");
+        var td = document.createElement("td");
+        td.innerText = "" + (index * 1 + 1);
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerText = cartItemList[index].title;
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerText = cartItemList[index].brand;
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        td.innerText = "₹"+cartItemList[index].price*80;
+        tr.appendChild(td);
+
+        td = document.createElement("td");
+        var qtyInput = document.createElement("input");
+        qtyInput.setAttribute("type", "number");
+        qtyInput.setAttribute("id", "qty" + index);
+        //qtyInput.value = 1;
+        qtyInput.style.width = "35px";
+        qtyInput.setAttribute("onchange", "updateQty(" + index + ")");
+        qtyInput.value = cartItemList[index].qty;
+
+        td = document.createElement("td");
+        var deleteItem = document.createElement("button");
+        deleteItem.setAttribute("class","btn btn-danger");
+        deleteItem.setAttribute("style", "width:30px; margin-left:10px;")
+        deleteItem.innerHTML = "&#88;";
+        
+
+        td.appendChild(qtyInput);
+        td.appendChild(deleteItem);
+        tr.appendChild(td);
+        table.appendChild(tr);
+    }
+
+    leftColDiv.appendChild(table);
+
+    var rightColDiv = document.createElement("div");
+    rightColDiv.setAttribute("class", "col-md-3   offset-1  d-flex align-items-center justify-content-center  p-1");
+
+    rightColDiv.style.flexDirection = "column";
+    rightColDiv.style.boxShadow = "10px 10px 10px 7px black";
+    rightColDiv.style.height = "250px";
+
+    var h3 = document.createElement("h3");
+    h3.innerText = "Order Summary";
+    h3.style.textAlign = "center";
+
+    var labelDiv = document.createElement("div");
+    var totalItemLabel = document.createElement("label");
+    totalItemLabel.innerText = "Total Item :";
+
+    var totalItemCountLabel = document.createElement("label");
+    totalItemCountLabel.innerText = "" + cartItemList.length;
+    totalItemCountLabel.style.marginLeft = "20px";
+    labelDiv.appendChild(totalItemLabel);
+    labelDiv.appendChild(totalItemCountLabel);
+
+    var priceDiv = document.createElement("div");
+    var priceH3 = document.createElement("h4");
+    priceH3.setAttribute("class", "text-success");
+    priceH3.innerHTML = "Bill Amount : <label id = 'totalBill'>" +"₹ "+ totalPrice() + "</label>";
+    priceDiv.appendChild(priceH3);
+
+    rightColDiv.appendChild(h3);
+    rightColDiv.appendChild(labelDiv);
+    rightColDiv.appendChild(priceDiv);
+
+    var checkOutButton = document.createElement("button");
+    checkOutButton.setAttribute("class", "btn btn-primary");
+    checkOutButton.setAttribute("style", "width:90%; margin:auto;");
+    checkOutButton.innerText = "Checkout";
+
+    checkOutButton.addEventListener("click", function () {
+        var checkOutModel = document.querySelector("#checkout-model");
+        checkOutModel.classList.remove("d-none");
+
+    });
+    rightColDiv.appendChild(checkOutButton);
+    rowDiv.appendChild(leftColDiv);
+    rowDiv.appendChild(rightColDiv);
+
+    containerDiv.appendChild(rowDiv);
+    mainDiv.appendChild(containerDiv);
+}
+
+
+function totalPrice() {
+    var cartItemList = localStorage.getItem("cartItemList");
+    cartItemList = JSON.parse(cartItemList);
+    var price = 0;
+    for (var product of cartItemList) {
+        price = price + product.price * product.qty*80;
+    }
+
+    return price;
+}
+
+function updateQty(index) {
+    var cartItemList = localStorage.getItem("cartItemList");
+    cartItemList = JSON.parse(cartItemList);
+    cartItemList[index].qty = document.getElementById("qty" + index).value;
+    localStorage.setItem("cartItemList", JSON.stringify(cartItemList));
+    var billAmount = totalPrice();
+    var totalBillLabel = document.querySelector("#totalBill");
+    totalBillLabel.innerHTML = "" + billAmount;
+
+
 }
 
 function createSignInPage(mainDiv) {
     var div = document.createElement("div");
     div.setAttribute("class", "container mt-5 border");
-    div.setAttribute("style", "width:30%; min-height:300px; padding:30px; margin:auto; position:absolute; top:50%; left:50%; transform: translate(-50%,-50%);");
+    div.setAttribute("style", "background-color:skyblue; width:30%; min-height:300px; padding:30px; margin:auto; position:absolute; top:40%; left:50%; transform: translate(-50%,-50%); border-radius:10px;");
 
     var inputDiv = document.createElement("div");
     var usernameInput = document.createElement("input");
     usernameInput.type = "text";
     usernameInput.placeholder = "Enter Username";
-    usernameInput.setAttribute("style", "height:40px; width:100%;");
+    usernameInput.setAttribute("style", "height:40px; width:100%;  border-radius:10px;");
 
     var passwordInput = document.createElement("input");
     passwordInput.type = "password";
     passwordInput.placeholder = "Enter Password";
-    passwordInput.setAttribute("style", "height:40px; width:100%; margin-top:40px;");
+    passwordInput.setAttribute("style", "height:40px; width:100%; margin-top:40px;  border-radius:10px;");
 
     var buttonInput = document.createElement("button");
     buttonInput.setAttribute("class", "btn");
-    buttonInput.innerHTML = "Sign In";
-    buttonInput.setAttribute("style", "margin-top:40px; width:100%; background-color:black; color:white;");
+    buttonInput.innerText = "Sign In";
+    buttonInput.setAttribute("style", "margin-top:40px; width:100%; background-color:black; color:white;  border-radius:10px;");
 
     buttonInput.addEventListener("click", function () {
+        var status = false;
         var user = usernameInput.value;
         var pass = passwordInput.value;
         var userList = localStorage.getItem("userList");
         userList = JSON.parse(userList);
-        var status = false;
+
         for (var userObject of userList) {
             if (userObject.username == user && userObject.password == pass) {
                 status = true;
-
                 break;
+            } else {
+                window.alert("Wrong username or passwword");
             }
         }
 
@@ -151,7 +326,10 @@ function createSignInPage(mainDiv) {
             sessionStorage.setItem("currentUser", "" + user);
             mainDiv.innerHTML = "";
             createNavigationBar();
-            createCart();
+
+            var data = localStorage.getItem("productList");
+            data = JSON.parse(data);
+            createMainPage(data);
         }
     });
 
@@ -163,29 +341,29 @@ function createSignInPage(mainDiv) {
 }
 
 function isLoggedIn() {
-    return !!sessionStorage.getItem("isloggedIn");
+    return !!sessionStorage.getItem("isLoggedIn");
 }
 
 function createSignUpPage(mainDiv) {
     var div = document.createElement("div");
     div.setAttribute("class", "container mt-5 border");
-    div.setAttribute("style", "width:30%; min-height:300px;padding:30px; margin-auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);");
+    div.setAttribute("style", "background-color:skyblue; width:30%; min-height:300px;padding:30px; margin-auto;position:absolute;top:40%;left:50%;transform:translate(-50%,-50%); border-radius:10px;");
 
     var inputDiv = document.createElement("div");
     var usernameInput = document.createElement("input");
     usernameInput.type = "text";
     usernameInput.placeholder = "Enter username";
-    usernameInput.setAttribute("style", "height:40px;width:100%;");
+    usernameInput.setAttribute("style", "height:40px;width:100%; border-radius:10px;");
 
     var passwordInput = document.createElement("input");
     passwordInput.type = "password";
     passwordInput.placeholder = "Enter password";
-    passwordInput.setAttribute("style", "height:40px;width:100%;margin-top:40px;");
+    passwordInput.setAttribute("style", "height:40px;width:100%;margin-top:40px; border-radius:10px;");
 
     var buttonInput = document.createElement("button");
     buttonInput.setAttribute("class", "btn");
     buttonInput.innerText = "Sign up";
-    buttonInput.setAttribute("style", "margin-top:40px;width:100%;background-color:black;color:white;");
+    buttonInput.setAttribute("style", "margin-top:40px;width:100%;background-color:black;color:white; border-radius:10px;");
 
     buttonInput.addEventListener("click", function () {
         var user = usernameInput.value;
@@ -197,6 +375,7 @@ function createSignUpPage(mainDiv) {
             var newUser = { username: user, password: pass };
             userList.push(newUser);
             localStorage.setItem("userList", JSON.stringify(userList));
+            window.alert("Account created successfully");
         }
         else
             window.alert("Please fill required details");
@@ -210,40 +389,47 @@ function createSignUpPage(mainDiv) {
     mainDiv.appendChild(div);
 }
 
-function createMainPage() {
+function createMainPage(data) {
     var mainDiv = document.querySelector("#main");
 
+    if (isLoggedIn()) {
+        var currentUser = sessionStorage.getItem("currentUser")
+        var nameDiv = document.createElement("div");
+        nameDiv.innerText = "Welcome " + currentUser;
+        nameDiv.setAttribute("style", "font-size:35px; text-align:center; font-weight: 450;")
+        mainDiv.appendChild(nameDiv);
+    }
     var rowDiv = document.createElement("div");
     rowDiv.setAttribute("class", "row mt-5");
+    rowDiv.setAttribute("id", "cart-row");
 
-    var data = localStorage.getItem("productList");
-    data = JSON.parse(data);
-
-    for (var product of data) {
+    for (var index in data) {
         var cartDiv = document.createElement("div");
         cartDiv.setAttribute("class", "col-md-4");
-        cartDiv.setAttribute("style", "padding:20px");
+        cartDiv.setAttribute("style", "padding:50px");
 
         var innerCartDiv = document.createElement("div");
-        innerCartDiv.setAttribute("style", "height:550px; box-shadow: 10px 10px 10px grey;");
+        innerCartDiv.setAttribute("style", "height:500px;");
         innerCartDiv.setAttribute("class", "text-center");
+        innerCartDiv.setAttribute("id", "cartDiv");
+
 
         var image = document.createElement("img");
-        image.src = product.thumbnail;
+        image.src = data[index].thumbnail;
         image.setAttribute("style", "width:100%; height:300px;");
 
         var h4 = document.createElement("h4");
-        h4.innerHTML = product.title.slice(0, 30);
+        h4.innerHTML = data[index].title.slice(0, 30);
         h4.setAttribute("class", "text-center mt-2");
 
         var h2 = document.createElement("h2");
         var priceString = "";
 
-        if (product.discountPercentage) {
-            priceString = `<del class="text-danger">${"$ " + product.price}</del>&nbsp;&nbsp;<span class="text-success">${"$ " + (product.price - ((product.price * product.discountPercentage) / 100)).toFixed(2)}</span>`;
+        if (data[index].discountPercentage) {
+            priceString = `<del class="text-danger">${"₹ " + data[index].price * 80}</del>&nbsp;&nbsp;<span class="text-success">${"₹ " + ((data[index].price - ((data[index].price * data[index].discountPercentage) / 100)) * 80).toFixed(2)}</span>`;
         }
         else
-            priceString = `<span>${product.price}</span>`;
+            priceString = `<span>${product.price * 80}</span>`;
 
         h2.innerHTML = priceString;
         h2.setAttribute("class", "text-center mt-1");
@@ -255,8 +441,21 @@ function createMainPage() {
 
         var button = document.createElement("button");
         button.innerHTML = "Add to Cart";
-        button.setAttribute("class", "btn btn-warning");
-        button.setAttribute("style", "width:90%; margin:auto");
+        button.setAttribute("class", "btn btn-primary");
+        button.style.backgroundColor = "pink";
+        button.setAttribute("style", "width:90%; margin:auto;");
+
+        button.setAttribute("onclick", "addToCart(" + index + ")");
+
+        // cartDiv.addEventListener("mouseover", function(){
+        //     console.log("over called");
+        //     cartDiv.setAttribute=("style","10px 10px 10px red");
+        // }); 
+
+        // cartDiv.addEventListener("mouseout", function(){
+        //     cartDiv.setAttribute=("style","5px 5px 5px red");
+        // })
+
         innerCartDiv.appendChild(image);
         innerCartDiv.appendChild(h4);
         innerCartDiv.appendChild(h2);
@@ -264,12 +463,94 @@ function createMainPage() {
         innerCartDiv.appendChild(button);
         cartDiv.appendChild(innerCartDiv);
         rowDiv.appendChild(cartDiv);
+
     }
 
     mainDiv.appendChild(rowDiv);
 }
 
+
+function addToCart(index) {
+    var productList = localStorage.getItem("productList");
+    productList = JSON.parse(productList);
+    var product = productList[index];
+    product = { ...product, qty: 1 };
+    var cartItemList = localStorage.getItem("cartItemList");
+    cartItemList = JSON.parse(cartItemList);
+
+    var itemIndex = cartItemList.findIndex((item) => { return item.id == product.id });
+    if (itemIndex == -1 && isLoggedIn()) {
+        cartItemList.push(product);
+        localStorage.setItem("cartItemList", JSON.stringify(cartItemList));
+        window.alert("Item Added into cart");
+
+    }
+    else {
+
+        if (isLoggedIn()) {
+            window.alert("Item already added into cart");
+        } else {
+            window.alert("please sign in first");
+            var mainDiv = document.querySelector("#main");
+            mainDiv.innerHTML = "";
+            createNavigationBar();
+            createSignInPage(mainDiv);
+        }
+    }
+}
+
+function placeOrder() {
+    var personName = document.querySelector("#personName").value;
+    var deliveryAddress = document.querySelector("#deliveryAddress").value;
+    var contactNumber = document.querySelector("#contactNumber").value;
+
+    var currentUser = sessionStorage.getItem("currentUser");
+    var currentUserOrderList = localStorage.getItem("currentUser");
+    var cartItemList = localStorage.getItem("cartItemList");
+    cartItemList = JSON.parse(cartItemList);
+    if (currentUserOrderList == undefined || currentUserOrderList.length == 0) {
+        var order = {
+            "orderDetails": {
+                "contactPerson": personName,
+                "deliveryAddress": deliveryAddress,
+                "contactNumber": contactNumber,
+                "totalBillAmount": totalPrice()
+            },
+            "orderItems": cartItemList
+        };
+        var orderList = [];
+        orderList.push(order);
+        localStorage.setItem(currentUser, JSON.stringify(orderList));
+    }
+    else {
+        var order = {
+            "orderDetails": {
+                "contactPerson": personName,
+                "deliveryAddress": deliveryAddress,
+                "contactNumber": contactNumber,
+                "totalBillAmount": totalPrice()
+            },
+            "orderItems": cartItemList
+        };
+
+        currentUserOrderList = JSON.parse(currentUserOrderList);
+        currentUserOrderList.push(order);
+        localStorage.setItem(currentUser, JSON.stringify(currentUserOrderList));
+    }
+
+    window.alert("Order Placed Successfully");
+
+}
+
+function cancelOrder() {
+    var checkOutModel = document.querySelector("#checkout-model");
+    checkOutModel.classList.add("d-none");
+}
+
 function uploadData() {
+    if (localStorage.getItem("cartItemList") == undefined) {
+        localStorage.setItem("cartItemList", "[]");
+    }
     var data = getData();
     localStorage.setItem("productList", JSON.stringify(data));
 }
